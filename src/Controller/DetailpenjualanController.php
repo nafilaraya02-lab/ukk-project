@@ -41,19 +41,40 @@ class DetailpenjualanController extends AppController
      *
      * @return \Cake\Http\Response|null|void Redirects on successful add, renders view otherwise.
      */
-    public function add()
+    public function add($id_penjualan = null)
     {
         $detailpenjualanEntity = $this->Detailpenjualan->newEmptyEntity();
         if ($this->request->is('post')) {
-            $detailpenjualanEntity = $this->Detailpenjualan->patchEntity($detailpenjualanEntity, $this->request->getData());
+            $data = $this->request->getData();
+
+            $productTable = $this->fetchTable('Product');
+            $product = $productTable->get($data['id_product']);
+            $data['subtotal'] = $product->harga * (int)$data['jumlah_product'];
+
+            $detailpenjualanEntity = $this->Detailpenjualan->patchEntity($detailpenjualanEntity, $data);
             if ($this->Detailpenjualan->save($detailpenjualanEntity)) {
+                $query = $this->Detailpenjualan->find()
+                    ->where(['id_penjualan' => $detailpenjualanEntity->id_penjualan]);
+                $newTotal = $query->select(['total' => $query->func()->sum('subtotal')])->first()->total ?? 0;
+
+                $penjualanTable = $this->fetchTable('Penjualan');
+                $penjualan = $penjualanTable->get($detailpenjualanEntity->id_penjualan);
+                $penjualan->total_harga = $newTotal;
+                $penjualanTable->save($penjualan);
+
                 $this->Flash->success(__('The detailpenjualan has been saved.'));
 
-                return $this->redirect(['action' => 'index']);
+                return $this->redirect(['action' => 'add', $detailpenjualanEntity->id_penjualan]);
             }
             $this->Flash->error(__('The detailpenjualan could not be saved. Please, try again.'));
         }
-        $this->set(compact('detailpenjualanEntity'));
+
+        $productList = $this->Detailpenjualan->Product->find('list', ['keyField' => 'id_product', 'valueField' => function ($row) {
+            return $row->nama_product . ' (Rp ' . number_format((float)$row->harga, 0, ',', '.');
+        }
+        ])->toArray();
+
+        $this->set(compact('detailpenjualanEntity','id_penjualan','productList'));
         
     }
 

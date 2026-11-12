@@ -40,6 +40,9 @@ class DetailpenjualanTable extends Table
         $this->setTable('detailpenjualan');
         $this->setDisplayField('id_detail');
         $this->setPrimaryKey('id_detail');
+
+        $this->belongsTo('Penjualan', ['foreignkey' => 'id_penjualan']);
+        $this->belongsTo('Product', ['foreignKey' => 'id_product']);
     }
 
     /**

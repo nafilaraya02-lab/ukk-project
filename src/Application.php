@@ -16,9 +16,16 @@ declare(strict_types=1);
  */
 namespace App;
 
+use Authentication\AuthenticationService;
+use Authentication\AuthenticationServiceInterface;
+use Authentication\AuthenticationServiceProviderInterface;
+use Authentication\Middleware\AuthenticationMiddleware;
+use Cake\Routing\Router;
+use Psr\Http\Message\ServerRequestInterface;
 use App\Middleware\HostHeaderMiddleware;
 use Cake\Core\Configure;
 use Cake\Core\ContainerInterface;
+use Cake\Http\ServerRequest;
 use Cake\Datasource\FactoryLocator;
 use Cake\Error\Middleware\ErrorHandlerMiddleware;
 use Cake\Event\EventManagerInterface;
@@ -38,7 +45,7 @@ use Cake\Routing\Middleware\RoutingMiddleware;
  *
  * @extends \Cake\Http\BaseApplication<\App\Application>
  */
-class Application extends BaseApplication
+class Application extends BaseApplication implements AuthenticationServiceProviderInterface
 {
     /**
      * Load all the application configuration and bootstrap logic.
@@ -51,10 +58,12 @@ class Application extends BaseApplication
         parent::bootstrap();
 
         // By default, does not allow fallback classes.
-        FactoryLocator::add(
+        if (PHP_SAPI !== 'cli') {
+            FactoryLocator::add(
             'Table',
             (new TableLocator())->allowFallbackClass(false),
         );
+        }
     }
 
     /**
@@ -69,7 +78,7 @@ class Application extends BaseApplication
             // Catch any exceptions in the lower layers,
             // and make an error page/response
             ->add(new ErrorHandlerMiddleware(Configure::read('Error'), $this))
-
+            
             // Validate Host header to prevent Host Header Injection attacks.
             // In production, ensures App.fullBaseUrl is configured and validates
             // the incoming Host header against it.
@@ -85,6 +94,7 @@ class Application extends BaseApplication
             // caching in production could improve performance.
             // See https://github.com/CakeDC/cakephp-cached-routing
             ->add(new RoutingMiddleware($this))
+            ->add(new AuthenticationMiddleware($this))
 
             // Parse various types of encoded request bodies so that they are
             // available as array through $request->getData()
@@ -126,4 +136,39 @@ class Application extends BaseApplication
 
         return $eventManager;
     }
+
+    public function getAuthenticationService(ServerRequestInterface $request): AuthenticationServiceInterface{
+        $authenticationService = new AuthenticationService([
+            'unauthenticatedRedirect' => Router::url([
+                'controller' => 'Login',
+                'action' => 'index',
+            ]),
+            'queryParam' => 'redirect',
+        ]);
+
+        $fields = [
+            'username' => 'username',
+            'password' => 'password',
+        ];
+
+        $authenticationService->loadAuthenticator('Authentication.Session');
+        $authenticationService->loadAuthenticator('Authentication.Form', [
+            'fields' => $fields,
+            'loginUrl' => Router::url([
+                'controller' => 'Login',
+                'action' => 'index',
+            ]),
+            'identifier' => [
+                'className' => 'Authentication.Password',
+                'fields' => $fields,
+                'resolver' => [
+                    'className' => 'Authentication.Orm',
+                    'userModel' => 'Users',
+                ]
+            ]
+        ]);
+
+        return $authenticationService;
+    }
 }
+

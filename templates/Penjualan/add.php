@@ -2,6 +2,7 @@
 /**
  * @var \App\View\AppView $this
  * @var \App\Model\Entity\Penjualan $penjualanEntity
+ * @var array $pelanggan
  */
 ?>
 <div class="row">
@@ -15,15 +16,15 @@
         <div class="penjualan form content">
             <?= $this->Form->create($penjualanEntity) ?>
             <fieldset>
-                <legend><?= __('Add Penjualan') ?></legend>
+                <legend><?= __('Add Transaksi Penjualan') ?></legend>
                 <?php
                     echo $this->Form->control('nama_product');
-                    echo $this->Form->control('tanggal_penjualan');
+                    echo $this->Form->control('tanggal_penjualan', ['value' => date('Y-m-d')]);
                     echo $this->Form->control('total_harga');
-                    echo $this->Form->control('id_pelanggan');
+                    echo $this->Form->control('id_pelanggan', ['options' => $pelanggan, 'empty' => '--Pilih Pelanggan--', 'label' => 'Pelanggan']);
                 ?>
             </fieldset>
-            <?= $this->Form->button(__('Submit')) ?>
+            <?= $this->Form->button(__('Pick Product')) ?>
             <?= $this->Form->end() ?>
         </div>
     </div>

@@ -45,6 +45,9 @@ class PenjualanController extends AppController
     {
         $penjualanEntity = $this->Penjualan->newEmptyEntity();
         if ($this->request->is('post')) {
+            $data = $this->request->getData();
+            $data['total_harga'] = 0;
+
             $penjualanEntity = $this->Penjualan->patchEntity($penjualanEntity, $this->request->getData());
             if ($this->Penjualan->save($penjualanEntity)) {
                 $this->Flash->success(__('The penjualan has been saved.'));
@@ -53,7 +56,10 @@ class PenjualanController extends AppController
             }
             $this->Flash->error(__('The penjualan could not be saved. Please, try again.'));
         }
-        $this->set(compact('penjualanEntity'));
+
+        $pelanggan = $this->Penjualan->Pelanggan->find('list', ['keyField' => 'id_pelanggan', 'valueField' => 'nama_pelanggan'])->toArray();
+
+        $this->set(compact('penjualanEntity', 'pelanggan'));
     }
     
     /**

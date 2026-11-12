@@ -15,8 +15,8 @@
             Data Pelanggan
         </a>
 
-        <a href="<?= $this->Url->build(['controller' => 'Produk', 'action' => 'index']) ?>" class="button">
-            Data Produk
+        <a href="<?= $this->Url->build(['controller' => 'Product', 'action' => 'index']) ?>" class="button">
+            Data Product
         </a>
 
         <a href="<?= $this->Url->build(['controller' => 'Login', 'action' => 'logout']) ?>" class="button button-outline">

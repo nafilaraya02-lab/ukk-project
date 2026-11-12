@@ -40,6 +40,9 @@ class PenjualanTable extends Table
         $this->setTable('penjualan');
         $this->setDisplayField('id_penjualan');
         $this->setPrimaryKey('id_penjualan');
+
+        $this->belongsTo('Pelanggan', ['foreignKey' => 'id_pelanggan']);
+        $this->hasMany('Detailpenjualan', ['foreignKey' => 'id_penjualan']);
     }
 
     /**
