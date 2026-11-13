@@ -20,16 +20,19 @@
                 <legend><?= __('Add Detailpenjualan') ?></legend>
                 <?php
                     echo $this->Form->control('id_penjualan', ['type' => 'text', 'value' => $id_penjualan, 'readonly' => true, 'label' => 'ID Penjualan']);
-                    echo $this->Form->control('id_produk', ['options' => $productList, 'empty' => '---Pick Product---', 'label' => 'Product']);
-                    echo $this->Form->control('jumlah_produk', ['type' => 'number', 'min' => 1, 'value' => 1, 'label' => 'Jumlah Product']);
-                    echo $this->Form->control('subtotal');
+                    echo $this->Form->control('id_product', ['options' => $productList, 'empty' => '---Pick Product---', 'label' => 'Product']);
+                    echo $this->Form->control('jumlah_product', ['type' => 'number', 'min' => 1, 'value' => 1, 'label' => 'Jumlah Product']);
                 ?>
             </fieldset>
             <?= $this->Form->button(__('Add product')) ?>
             <?= $this->Form->end() ?>
 
             <br>
-            <a href="<?= $this->Url->build(['controller' => 'Penjualan', 'action' => 'index']) ?>" class="button button-outline">Back to List</a>
+            <?php if (!empty($id_penjualan)): ?>
+                <a href="<?=  $this->Url->build(['controller' => 'Penjualan', 'action' => 'view', $id_penjualan]) ?>" class="button button-outline">Back to List and See Nota</a>
+                <?php else: ?>
+                    <a href="<?=  $this->Url->build(['controller' => 'Penjualan', 'action' => 'index']) ?>" class="button button-outline">Back to List</a>
+                    <?php endif; ?>
         </div>
     </div>
 </div>

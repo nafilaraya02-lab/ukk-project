@@ -10,8 +10,8 @@ use Cake\ORM\Entity;
  *
  * @property int $id_detail
  * @property int $id_penjualan
- * @property int $id_produk
- * @property int $jumlah_produk
+ * @property int $id_product
+ * @property int $jumlah_product
  * @property string $subtotal
  */
 class Detailpenjualan extends Entity
@@ -27,8 +27,8 @@ class Detailpenjualan extends Entity
      */
     protected array $_accessible = [
         'id_penjualan' => true,
-        'id_produk' => true,
-        'jumlah_produk' => true,
+        'id_product' => true,
+        'jumlah_product' => true,
         'subtotal' => true,
     ];
 }

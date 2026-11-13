@@ -32,8 +32,17 @@ class PenjualanController extends AppController
      */
     public function view($id = null)
     {
-        $penjualanEntity = $this->Penjualan->get($id, ['contain' => []]);
-        $this->set(compact('penjualanEntity'));
+        $penjualanEntity = $this->Penjualan->get($id, [
+            'contain' => [
+                'Pelanggan',
+            ],
+        ]);
+        $detailItems = $this->fetchTable('Detailpenjualan')->find()
+            ->contain(['Product'])
+            ->where(['Detailpenjualan.id_penjualan' => $id])
+            ->all();
+
+        $this->set(compact('penjualanEntity', 'detailItems'));
     }
 
     /**
@@ -52,7 +61,7 @@ class PenjualanController extends AppController
             if ($this->Penjualan->save($penjualanEntity)) {
                 $this->Flash->success(__('The penjualan has been saved.'));
 
-                return $this->redirect(['controller' => 'Detailpenjualan', 'action' => 'add', 'id' => $penjualanEntity->id_penjualan]);
+                return $this->redirect(['controller' => 'Detailpenjualan', 'action' => 'add', $penjualanEntity->id_penjualan]);
             }
             $this->Flash->error(__('The penjualan could not be saved. Please, try again.'));
         }

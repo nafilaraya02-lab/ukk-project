@@ -41,7 +41,7 @@ class DetailpenjualanTable extends Table
         $this->setDisplayField('id_detail');
         $this->setPrimaryKey('id_detail');
 
-        $this->belongsTo('Penjualan', ['foreignkey' => 'id_penjualan']);
+        $this->belongsTo('Penjualan', ['foreignKey' => 'id_penjualan']);
         $this->belongsTo('Product', ['foreignKey' => 'id_product']);
     }
 
@@ -59,14 +59,14 @@ class DetailpenjualanTable extends Table
             ->notEmptyString('id_penjualan');
 
         $validator
-            ->integer('id_produk')
-            ->requirePresence('id_produk', 'create')
-            ->notEmptyString('id_produk');
+            ->integer('id_product')
+            ->requirePresence('id_product', 'create')
+            ->notEmptyString('id_product');
 
         $validator
-            ->integer('jumlah_produk')
-            ->requirePresence('jumlah_produk', 'create')
-            ->notEmptyString('jumlah_produk');
+            ->integer('jumlah_product')
+            ->requirePresence('jumlah_product', 'create')
+            ->notEmptyString('jumlah_product');
 
         $validator
             ->decimal('subtotal')

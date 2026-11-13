@@ -23,8 +23,8 @@
                 <legend><?= __('Edit Detailpenjualan') ?></legend>
                 <?php
                     echo $this->Form->control('id_penjualan');
-                    echo $this->Form->control('id_produk');
-                    echo $this->Form->control('jumlah_produk');
+                    echo $this->Form->control('id_product');
+                    echo $this->Form->control('jumlah_product');
                     echo $this->Form->control('subtotal');
                 ?>
             </fieldset>

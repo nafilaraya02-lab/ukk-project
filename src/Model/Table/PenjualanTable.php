@@ -72,7 +72,7 @@ class PenjualanTable extends Table
             ->scalar('nama_product')
             ->maxLength('nama_product', 255)
             ->requirePresence('nama_product', 'create')
-            ->notEmptyString('nama_product');
+            ->allowEmptyString('nama_product');
 
         return $validator;
     }

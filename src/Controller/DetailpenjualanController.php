@@ -17,7 +17,9 @@ class DetailpenjualanController extends AppController
      */
     public function index()
     {
-        $query = $this->Detailpenjualan->find();
+        $query = $this->Detailpenjualan->find()
+            ->contain(['Penjualan', 'Product'])
+            ->orderBy(['Detailpenjualan.id_detail' => 'DESC']);
         $detailpenjualan = $this->paginate($query);
 
         $this->set(compact('detailpenjualan'));
@@ -32,13 +34,16 @@ class DetailpenjualanController extends AppController
      */
     public function view($id = null)
     {
-        $detailpenjualanEntity = $this->Detailpenjualan->get($id, contain: []);
+        $detailpenjualanEntity = $this->Detailpenjualan->get($id, contain: [
+            'contain' => ['Penjualan', 'Product'],
+        ]);
         $this->set(compact('detailpenjualanEntity'));
     }
 
     /**
      * Add method
      *
+     * @param string|null $id_penjualan Penjualan id.
      * @return \Cake\Http\Response|null|void Redirects on successful add, renders view otherwise.
      */
     public function add($id_penjualan = null)
@@ -46,20 +51,43 @@ class DetailpenjualanController extends AppController
         $detailpenjualanEntity = $this->Detailpenjualan->newEmptyEntity();
         if ($this->request->is('post')) {
             $data = $this->request->getData();
+            $jumlahBeli = (int)$data['jumlah_product'];
 
             $productTable = $this->fetchTable('Product');
             $product = $productTable->get($data['id_product']);
-            $data['subtotal'] = $product->harga * (int)$data['jumlah_product'];
+            if ($product->stock < $jumlahBeli) {
+                $this->Flash->error(__('Stok tidak mencukupi! Sisa stok ' . $product->nama_product . 'hanya' . $product->stock . '.'));
+                return $this->redirect(['action' => 'add', $id_penjualan]);
+            }
+            if (empty($data['id_penjualan']) && $id_penjualan) {
+                $data['id_penjualan'] = $id_penjualan;
+            }
+            $data['subtotal'] = $product->harga * $jumlahBeli;
 
             $detailpenjualanEntity = $this->Detailpenjualan->patchEntity($detailpenjualanEntity, $data);
             if ($this->Detailpenjualan->save($detailpenjualanEntity)) {
-                $query = $this->Detailpenjualan->find()
-                    ->where(['id_penjualan' => $detailpenjualanEntity->id_penjualan]);
-                $newTotal = $query->select(['total' => $query->func()->sum('subtotal')])->first()->total ?? 0;
+
+                $product->stock = $product->stock - $jumlahBeli;
+                $productTable->save($product);
+
+                $semuaDetail = $this->Detailpenjualan->find()
+                    ->contain(['Product'])
+                    ->where(['Detailpenjualan.id_penjualan' => $detailpenjualanEntity->id_penjualan])
+                    ->all();
+
+                    $daftarNama = [];
+                    $newTotal = 0;
+                    foreach ($semuaDetail as $d) {
+                        $newTotal += (float)$d->subtotal;
+                        if ($d->has('product')) {
+                            $daftarNama[] = $d->product->nama_product . '(' . $d->jumlahproduct . 'x)';
+                        }
+                    }
 
                 $penjualanTable = $this->fetchTable('Penjualan');
                 $penjualan = $penjualanTable->get($detailpenjualanEntity->id_penjualan);
                 $penjualan->total_harga = $newTotal;
+                $penjualan->nama_product = implode(',', $daftarNama);
                 $penjualanTable->save($penjualan);
 
                 $this->Flash->success(__('The detailpenjualan has been saved.'));
@@ -69,13 +97,22 @@ class DetailpenjualanController extends AppController
             $this->Flash->error(__('The detailpenjualan could not be saved. Please, try again.'));
         }
 
-        $productList = $this->Detailpenjualan->Product->find('list', ['keyField' => 'id_product', 'valueField' => function ($row) {
-            return $row->nama_product . ' (Rp ' . number_format((float)$row->harga, 0, ',', '.');
-        }
+        $productList = $this->fetchTable('Product')->find('list', [
+            'keyField' => 'id_product',
+            'valueField' => function ($row) {
+                return $row->nama_product . ' - Rp ' . number_format((float)$row->harga, 0, ',', '.') . ' (Stok: ' . $row->stok . ')';
+            }
         ])->toArray();
 
-        $this->set(compact('detailpenjualanEntity','id_penjualan','productList'));
+        $detailList = [];
+        if (!empty($id_penjualan)) {
+            $detailList = $this->Detailpenjualan->find()
+            ->contain(['Product'])
+            ->where(['Detailpenjualan.id_penjualan' => $id_penjualan])
+            ->all();
+        }
         
+        $this->set(compact('detailpenjualanEntity', 'id_penjualan', 'productList', 'detailList'));
     }
 
     /**

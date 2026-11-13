@@ -27,12 +27,16 @@
                     <td><?= $this->Number->format($detailpenjualanEntity->id_penjualan) ?></td>
                 </tr>
                 <tr>
-                    <th><?= __('Id Produk') ?></th>
-                    <td><?= $this->Number->format($detailpenjualanEntity->id_produk) ?></td>
+                    <th><?= __('Id Product') ?></th>
+                    <td><?= $this->Number->format($detailpenjualanEntity->id_product) ?></td>
                 </tr>
                 <tr>
-                    <th><?= __('Jumlah Produk') ?></th>
-                    <td><?= $this->Number->format($detailpenjualanEntity->jumlah_produk) ?></td>
+                    <th><?=  __('Nama Product') ?></th>
+                    <td><?= $detailpenjualanEntity->has('product') ? h($detailpenjualanEntity->product->nama_product) : '-' ?></td>
+                </tr>
+                <tr>
+                    <th><?= __('Jumlah Product') ?></th>
+                    <td><?= $this->Number->format($detailpenjualanEntity->jumlah_product) ?></td>
                 </tr>
                 <tr>
                     <th><?= __('Subtotal') ?></th>

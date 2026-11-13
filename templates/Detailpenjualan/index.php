@@ -13,8 +13,9 @@
                 <tr>
                     <th><?= $this->Paginator->sort('id_detail') ?></th>
                     <th><?= $this->Paginator->sort('id_penjualan') ?></th>
-                    <th><?= $this->Paginator->sort('id_produk') ?></th>
-                    <th><?= $this->Paginator->sort('jumlah_produk') ?></th>
+                    <th><?= $this->Paginator->sort('id_product') ?></th>
+                    <th><?= $this->Paginator->sort('jumlah_product') ?></th>
+                    <th><?= __('Nama Product') ?></th>
                     <th><?= $this->Paginator->sort('subtotal') ?></th>
                     <th class="actions"><?= __('Actions') ?></th>
                 </tr>
@@ -24,8 +25,9 @@
                 <tr>
                     <td><?= $this->Number->format($detailpenjualanEntity->id_detail) ?></td>
                     <td><?= $this->Number->format($detailpenjualanEntity->id_penjualan) ?></td>
-                    <td><?= $this->Number->format($detailpenjualanEntity->id_produk) ?></td>
-                    <td><?= $this->Number->format($detailpenjualanEntity->jumlah_produk) ?></td>
+                    <td><?= $this->Number->format($detailpenjualanEntity->id_product) ?></td>
+                    <td><?= $detailpenjualanEntity->has('product') ? h($detailpenjualanEntity->product->nama_product) : '-' ?></td>
+                    <td><?= $this->Number->format($detailpenjualanEntity->jumlah_product) ?></td>
                     <td><?= $this->Number->format($detailpenjualanEntity->subtotal) ?></td>
                     <td class="actions">
                         <?= $this->Html->link(__('View'), ['action' => 'view', $detailpenjualanEntity->id_detail]) ?>
